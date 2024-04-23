@@ -1,6 +1,7 @@
 #costum utility to solve some exercises at school
 
 import sys
+import math
 
 #example of a call: vlsm -a 192.168.10.100 -m 24  -n  2000 4 4 5500
 
@@ -34,6 +35,12 @@ def str_to_int_ip(ip: str) -> int:
         res += int(v) * (256 ** (3 - i)) 
     return res
 
+def ceil_log_2(val) -> int: #returns the power of 2 that is greater or equal than necessity and the exponent
+    l = math.log2(val)
+    l = math.ceil(l)
+    return l
+
+    
 class subnet_entry:
     def __init__(self, ip: int, mask: int, num_of_hosts: int):
         self.ip = ip
@@ -66,10 +73,16 @@ def get_valid_num(val: str, message : str = None, min : int = 0, max : int = 0xF
         return int(val)
     break_out(message)
 
+#can validate base mask only here and not in parsing arguments, because all masks will pass from this function before going to final entries
+def necessity_mask(necessity: int, base_mask: int = 0) -> int:
+    l2 = ceil_log_2(necessity)
+    mask = get_valid_num(str(32 - l2), f"necessity violates base mask {necessity}", base_mask, 32)
+
 
 def shift_list(args):
     return args[0], args[1:]
 
+#does not check necessities agains base mask, only parses the command line arguments and returns them
 def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
     #values to return
     ip   : int = 0
@@ -113,16 +126,47 @@ def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
     #valid arguments (from here is only happy path)  
     return (ip, mask, needs)
 
-def build_table(base_ip: int, mask : int, necessities : list[int]) -> dict[subnet_entry]:
-    pass
+def build_table(base_ip: int, base_mask : int, necessities : list[int]) -> list[subnet_entry]:
+    entries: list[subnet_entry] = []
 
-def print_table(entries: dict[subnet_entry]):
-    pass
+    necessities = [2 ** ceil_log_2(n) for n in necessities]  #turn all necessities into powers of 2
+    current_ip = base_ip
+
+    for necessity in necessities:
+        entry : subnet_entry = subnet_entry(current_ip, necessity_mask(necessity, base_mask), necessity) #Note: redundant paramter list
+        entries.append(entry)
+        current_ip += necessity
+    return entries
+
+
+def print_table(entries: list[subnet_entry]):
+    ipjust = 13
+    iphjust=16
+    mjust=7
+    numjust=4
+
+    #table header
+    print(f"\
+ {"num-hosts".rjust(numjust)}\
+    {"subnetwork ip".ljust(iphjust)}\
+ {"mask".ljust(mjust)}\
+ {"first valid".ljust(iphjust)}\
+ {"last valid".ljust(iphjust)}\
+ {"broadcast".ljust(iphjust)}")
+    #table body
+    for e in entries:
+        print(f"\
+    {str(e.num_of_hosts).ljust(mjust)}\
+    {int_to_str_ip(e.ip).ljust(ipjust)}{("/"+str(mask)).rjust(mjust)}\
+    {int_to_str_ip(e.first_host()).rjust(ipjust)}\
+    {int_to_str_ip(e.last_host()).rjust(ipjust)}\
+    {int_to_str_ip(e.broadcast_ip()).rjust(ipjust)}")
 
 
 if __name__ == '__main__':
     program = sys.argv[0]
     argv = sys.argv[1:]
     entries = parse_args(argv)
-    print(entries)
+    ip, mask, necessities = entries
+    print_table(build_table(ip, mask, necessities))
     exit(0)
