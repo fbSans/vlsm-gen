@@ -1,3 +1,8 @@
+#Autor: Fabrício Nhantumbo
+#Data: 24/04/2024
+#email: fabrisansao@gmail.com
+
+
 #costum utility to solve some exercises at school
 
 import sys
