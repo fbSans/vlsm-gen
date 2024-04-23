@@ -35,18 +35,19 @@ def str_to_int_ip(ip: str) -> int:
     return res
 
 class subnet_entry:
-    def __init__(self, ip: int, mask: int):
+    def __init__(self, ip: int, mask: int, num_of_hosts: int):
         self.ip = ip
         self.mask = mask
+        self.num_of_hosts = num_of_hosts
 
-    def first_host() -> int :
-        pass
+    def first_host(self) -> int :
+        return self.ip + 1
 
-    def last_host() -> int:
-        pass
+    def last_host(self) -> int:
+        return self.ip + self.num_of_hosts - 2 
 
-    def gateway() -> int:
-        pass
+    def broadcast_ip(self) -> int:
+        return self.ip + self.num_of_hosts - 1
 
 
 
