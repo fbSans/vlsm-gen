@@ -82,6 +82,7 @@ def get_valid_num(val: str, message : str = None, min : int = 0, max : int = 0xF
 def necessity_mask(necessity: int, base_mask: int = 0) -> int:
     l2 = ceil_log_2(necessity)
     mask = get_valid_num(str(32 - l2), f"necessity violates base mask {necessity}", base_mask, 32)
+    return mask
 
 
 def shift_list(args):
@@ -162,7 +163,7 @@ def print_table(entries: list[subnet_entry]):
     for e in entries:
         print(f"\
     {str(e.num_of_hosts).ljust(mjust)}\
-    {int_to_str_ip(e.ip).ljust(ipjust)}{("/"+str(mask)).rjust(mjust)}\
+    {int_to_str_ip(e.ip).ljust(ipjust)}{("/"+str(e.mask)).rjust(mjust)}\
     {int_to_str_ip(e.first_host()).rjust(ipjust)}\
     {int_to_str_ip(e.last_host()).rjust(ipjust)}\
     {int_to_str_ip(e.broadcast_ip()).rjust(ipjust)}")
