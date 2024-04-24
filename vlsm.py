@@ -46,7 +46,7 @@ def ceil_log_2(val) -> int: #returns the power of 2 that is greater or equal tha
     return l
 
     
-class subnet_entry:
+class SubnetEntry:
     def __init__(self, ip: int, mask: int, num_of_hosts: int):
         self.ip = ip
         self.mask = mask
@@ -132,20 +132,20 @@ def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
     #valid arguments (from here is only happy path)  
     return (ip, mask, needs)
 
-def build_table(base_ip: int, base_mask : int, necessities : list[int]) -> list[subnet_entry]:
-    entries: list[subnet_entry] = []
+def build_table(base_ip: int, base_mask : int, necessities : list[int]) -> list[SubnetEntry]:
+    entries: list[SubnetEntry] = []
 
     necessities = [2 ** ceil_log_2(n) for n in necessities]  #turn all necessities into powers of 2
     current_ip = base_ip
 
     for necessity in necessities:
-        entry : subnet_entry = subnet_entry(current_ip, necessity_mask(necessity, base_mask), necessity) #Note: redundant paramter list
+        entry : SubnetEntry = SubnetEntry(current_ip, necessity_mask(necessity, base_mask), necessity) #Note: redundant paramter list
         entries.append(entry)
         current_ip += necessity
     return entries
 
 
-def print_table(entries: list[subnet_entry]):
+def print_table(entries: list[SubnetEntry]):
     ipjust = 13
     iphjust=16
     mjust=7
