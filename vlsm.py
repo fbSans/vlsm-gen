@@ -67,7 +67,7 @@ def get_ipv4(val: str) -> int:
     ls = val.split('.')
     result = len(ls) == 4
     for v in ls:
-        result = result or str.isnumeric(v) and 0 <= int(v) < 256
+        result = result and str.isnumeric(v) and 0 <= int(v) < 256
     if result:
         return str_to_int_ip(val)
     break_out(f"invalid ip: {val}")
