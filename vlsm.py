@@ -80,6 +80,7 @@ def get_valid_num(val: str, message : str = None, min : int = 0, max : int = 0xF
         return int(val)
     break_out(message)
 
+#Todo: revise the mask vs necessity check (take into account the previosly added subnets)
 #can validate base mask only here and not in parsing arguments, because all masks will pass from this function before going to final entries
 def necessity_mask(necessity: int, base_mask: int = 0) -> int:
     l2 = ceil_log_2(necessity)
