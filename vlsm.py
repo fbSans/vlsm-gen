@@ -11,6 +11,7 @@ import math
 #example of a call: vlsm -a 192.168.10.100 -m 24  -n  2000 4 4 5500
 
 def usage():
+    print("Usage:")
     print("vlsm -a <base_addr> -m <base_net_mask> -n (<necessity>  ... )")
     print("    -a        specifies the base network address for creating the subnets.")
     print("    -m        specifies the base net mask")
@@ -70,7 +71,7 @@ def get_ipv4(val: str) -> int:
         result = result and str.isnumeric(v) and 0 <= int(v) < 256
     if result:
         return str_to_int_ip(val)
-    break_out(f"invalid ip: {val}")
+    break_out(f"Error: Invalid ip format: {val}")
 
 
 def get_valid_num(val: str, message : str = None, min : int = 0, max : int = 0xFFFFFFFF):
@@ -81,7 +82,7 @@ def get_valid_num(val: str, message : str = None, min : int = 0, max : int = 0xF
 #can validate base mask only here and not in parsing arguments, because all masks will pass from this function before going to final entries
 def necessity_mask(necessity: int, base_mask: int = 0) -> int:
     l2 = ceil_log_2(necessity)
-    mask = get_valid_num(str(32 - l2), f"necessity violates base mask {necessity}", base_mask, 32)
+    mask = get_valid_num(str(32 - l2), f"Error: Necessity exceeds base mask: mask = /{base_mask}, necessity = {necessity}", base_mask, 32)
     return mask
 
 
@@ -103,7 +104,7 @@ def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
     #parse arguments
     while len(argv) > 0:
         if len(argv) < 2:
-            break_out("not enough arguments")
+            break_out("Error: Not enough arguments")
         option, argv = shift_list(argv)
         match option:
             case "-a":
@@ -113,15 +114,15 @@ def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
                 got_ip = True
             case "-m":
                 val, argv = shift_list(argv)
-                mask = get_valid_num(val, "Invalid mask, mask mast be between 0 and 32 ", 0, 32)
+                mask = get_valid_num(val, "Error: Invalid mask, mask mast be between 0 and 32 ", 0, 32)
                 got_mask = True
             case "-n":
                 while len(argv) > 0 and (argv[0] != '-a' or argv[0] != 'm'):
                     val, argv = shift_list(argv)
-                    needs.append(get_valid_num(val, "necessity must be positive"))
+                    needs.append(get_valid_num(val, "Error: Necessity must be positive"))
                 got_needs = True
             case _ :
-                break_out(f"unknown option {option}")
+                break_out(f"Error: Unknown option {option}")
 
     #incomplete command specification            
     if(not(got_ip and got_mask and got_needs)):
