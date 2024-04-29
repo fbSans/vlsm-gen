@@ -10,18 +10,19 @@ import math
 
 #example of a call: vlsm -a 192.168.10.100 -m 24  -n  2000 4 4 5500
 
-def usage():
-    print("Usage:")
-    print("vlsm -a <base_addr> -m <base_net_mask> -n (<necessity>  ... )")
-    print("    -a        specifies the base network address for creating the subnets.")
-    print("    -m        specifies the base net mask")
-    print("    -n        a space separated list of the needs for each network")
+def usage(outfile):
+    print("""\
+    Usage:
+        vlsm -a <base_addr> -m <base_net_mask> -n (<necessity>  ... )")
+            -a        specifies the base network address for creating the subnets.
+            -m        specifies the base net mask.
+            -n        a space separated list of the needs for each network.""", file=outfile)
 
 
 def break_out(message : str = None):
     if message is not None:
-        print(message)
-    usage()
+        sys.stderr.write(message)
+    usage(sys.stderr)
     exit(1)
 
 def int_to_str_ip(ip: int) -> str:
