@@ -151,7 +151,7 @@ def print_table(entries: list[SubnetEntry]):
     ip_cw = 16      #for ip
     m_cw = 6       #for mask
     num_cw = 10     #for normal numbers
-    horz_sep = f"+{'-' * (4 * ip_cw + m_cw + num_cw + 5)}+"
+    horz_sep = f"+{'-'*(num_cw)}+{'-'*(ip_cw)}+{'-'*(m_cw)}+{'-'*(ip_cw)}+{'-'*(ip_cw)}+{'-'*(ip_cw)}+"
     ip_fmt = f"^{ip_cw}"
     m_fmt = f"^{m_cw}"
     num_fmt = f"^{num_cw}"
