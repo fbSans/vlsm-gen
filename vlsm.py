@@ -145,29 +145,37 @@ def build_table(base_ip: int, base_mask : int, necessities : list[int]) -> list[
     return entries
 
 
+#Todo: generalize the table printing method, for use in other projects
 def print_table(entries: list[SubnetEntry]):
-    ipjust = 13
-    iphjust=16
-    mjust=7
-    numjust=4
+    #cw stands for column witdh
+    ip_cw = 16      #for ip
+    m_cw = 6       #for mask
+    num_cw = 10     #for normal numbers
+    horz_sep = f"+{'-' * (4 * ip_cw + m_cw + num_cw + 5)}+"
+    ip_fmt = f"^{ip_cw}"
+    m_fmt = f"^{m_cw}"
+    num_fmt = f"^{num_cw}"
 
     #table header
+    print(horz_sep)
     print(f"\
- {"num-hosts".rjust(numjust)}\
-    {"subnetwork ip".ljust(iphjust)}\
- {"mask".ljust(mjust)}\
- {"first valid".ljust(iphjust)}\
- {"last valid".ljust(iphjust)}\
- {"broadcast".ljust(iphjust)}")
+|{"num-hosts":{num_fmt}}\
+|{"subnetwork ip":{ip_fmt}}\
+|{"mask":{m_fmt}}\
+|{"first valid":{ip_fmt}}\
+|{"last valid":{ip_fmt}}\
+|{"broadcast":{ip_fmt}}|")
+    print(horz_sep)
     #table body
     for e in entries:
         print(f"\
-    {str(e.num_of_hosts).ljust(mjust)}\
-    {int_to_str_ip(e.ip).ljust(ipjust)}{("/"+str(e.mask)).rjust(mjust)}\
-    {int_to_str_ip(e.first_host()).rjust(ipjust)}\
-    {int_to_str_ip(e.last_host()).rjust(ipjust)}\
-    {int_to_str_ip(e.broadcast_ip()).rjust(ipjust)}")
-
+|{str(e.num_of_hosts):{num_fmt}}\
+|{int_to_str_ip(e.ip):{ip_fmt}}\
+|{("/"+str(e.mask)):{m_fmt}}\
+|{int_to_str_ip(e.first_host()):{ip_fmt}}\
+|{int_to_str_ip(e.last_host()):{ip_fmt}}\
+|{int_to_str_ip(e.broadcast_ip()):{ip_fmt}}|")
+    print(horz_sep)
 
 if __name__ == '__main__':
     program = sys.argv[0]
