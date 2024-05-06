@@ -3,7 +3,7 @@
 #email: fabrisansao@gmail.com
 
 
-#costum utility to solve some exercises at school
+#costum utility to solve some vlsm exercises at school
 
 import sys
 import math
@@ -12,16 +12,16 @@ import math
 
 def usage(outfile):
     print("""\
-    Usage:
-        vlsm -a <base_addr> -m <base_net_mask> -n (<necessity>  ... )")
-            -a        specifies the base network address for creating the subnets.
-            -m        specifies the base net mask.
-            -n        a space separated list of the needs for each network.""", file=outfile)
+Usage:
+    vlsm -a <base_addr> -m <base_net_mask> -n (<necessity>  ... )
+        -a        specifies the base network address for creating the subnets.
+        -m        specifies the base net mask.
+        -n        a space separated list of the needs for each network.""", file=outfile)
 
 
 def break_out(message : str = None):
     if message is not None:
-        sys.stderr.write(message)
+        sys.stderr.write(f"{message}\n")
     usage(sys.stderr)
     exit(1)
 
@@ -42,17 +42,18 @@ def str_to_int_ip(ip: str) -> int:
         res += int(v) * (256 ** (3 - i)) 
     return res
 
-def ceil_log_2(val) -> int: #returns the power of 2 that is greater or equal than necessity and the exponent
+def ceil_log_2(val) -> int: 
+    '''returns applies log2 followed by ceil in the argument'''
     l = math.log2(val)
     l = math.ceil(l)
     return l
 
     
 class SubnetEntry:
-    def __init__(self, ip: int, mask: int, num_of_hosts: int):
-        self.ip = ip
-        self.mask = mask
-        self.num_of_hosts = num_of_hosts
+    def __init__(self, ip: int, mask: int):
+        self.ip : int = ip
+        self.mask : int = mask
+        self.num_of_hosts : int = 2 ** (32 - mask)
 
     def first_host(self) -> int :
         return self.ip + 1
@@ -84,7 +85,9 @@ def get_valid_num(val: str, message : str = None, min : int = 0, max : int = 0xF
 #can validate base mask only here and not in parsing arguments, because all masks will pass from this function before going to final entries
 def necessity_mask(necessity: int, base_mask: int = 0) -> int:
     l2 = ceil_log_2(necessity)
-    mask = get_valid_num(str(32 - l2), f"Error: Necessity exceeds base mask: mask = /{base_mask}, necessity = {necessity}", base_mask, 32)
+    error_message= f"Error: Necessity exceeds base mask /{base_mask} capacity\n\
+    Necessity requires {2**l2} hosts: mask capacity = {2**base_mask} host, necessity is {necessity}."
+    mask = get_valid_num(str(32 - l2), error_message, base_mask, 32)
     return mask
 
 
@@ -106,25 +109,27 @@ def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
     #parse arguments
     while len(argv) > 0:
         if len(argv) < 2:
-            break_out("Error: Not enough arguments")
+            break_out("Error: Not enough arguments.")
         option, argv = shift_list(argv)
         match option:
             case "-a":
-                if got_ip: break_out()
+                if got_ip: break_out("Error: -a flag must be specified once.")
                 val, argv = shift_list(argv)
                 ip = get_ipv4(val)
                 got_ip = True
             case "-m":
+                if got_mask: break_out("Error: -m flags must be specified once.")
                 val, argv = shift_list(argv)
-                mask = get_valid_num(val, "Error: Invalid mask, mask mast be between 0 and 32 ", 0, 32)
+                mask = get_valid_num(val, "Error: Invalid mask, mask mast be between 0 and 32.", 0, 32)
                 got_mask = True
             case "-n":
+                if got_needs: break_out("Error: -n flags must be specified once.")
                 while len(argv) > 0 and (argv[0] != '-a' or argv[0] != 'm'):
                     val, argv = shift_list(argv)
-                    needs.append(get_valid_num(val, "Error: Necessity must be positive"))
+                    needs.append(get_valid_num(val, "Error: Necessity must be positive."))
                 got_needs = True
             case _ :
-                break_out(f"Error: Unknown option {option}")
+                break_out(f"Error: Unknown option {option}.")
 
     #incomplete command specification            
     if(not(got_ip and got_mask and got_needs)):
@@ -138,13 +143,19 @@ def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
 def build_table(base_ip: int, base_mask : int, necessities : list[int]) -> list[SubnetEntry]:
     entries: list[SubnetEntry] = []
 
-    necessities = [2 ** ceil_log_2(n) for n in necessities]  #turn all necessities into powers of 2
-    current_ip = base_ip
-
-    for necessity in necessities:
-        entry : SubnetEntry = SubnetEntry(current_ip, necessity_mask(necessity, base_mask), necessity) #Note: redundant paramter list
+    amount_of_hosts : list[int] = [2 ** ceil_log_2(n) for n in necessities]  #turn all necessities into powers of 2
+    current_ip : int = base_ip
+    host_alloced_amount : int = 0
+    for necessity, host_amount in zip(necessities, amount_of_hosts):
+        entry : SubnetEntry = SubnetEntry(current_ip, necessity_mask(necessity, base_mask))
         entries.append(entry)
-        current_ip += necessity
+        current_ip += host_amount
+        host_alloced_amount += host_amount 
+
+    #check to see if allocated amount of host does not violate the mask
+    mask_capacity =  2 ** (32 - base_mask)
+    if host_alloced_amount > mask_capacity:
+        break_out(f"Error: The base mask /{base_mask} is not enough for the necessities\n    Maximum with mask = {mask_capacity}, needed {host_alloced_amount}.")    
     return entries
 
 
