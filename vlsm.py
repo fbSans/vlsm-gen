@@ -86,7 +86,7 @@ def get_valid_num(val: str, message : str = None, min : int = 0, max : int = 0xF
 def necessity_mask(necessity: int, base_mask: int = 0) -> int:
     l2 = ceil_log_2(necessity)
     error_message= f"Error: Necessity exceeds base mask /{base_mask} capacity\n\
-    Necessity requires {2**l2} hosts: mask capacity = {2**base_mask} host, necessity is {necessity}."
+    Necessity requires {2**l2} hosts: mask capacity = {2**(32 - base_mask)} host, necessity is {necessity}."
     mask = get_valid_num(str(32 - l2), error_message, base_mask, 32)
     return mask
 
