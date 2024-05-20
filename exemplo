@@ -1,2 +1,0 @@
-coloca isto na linha de comando
-vlsm -a 192.168.0.0 -m 24 -n 100 200 30 5
