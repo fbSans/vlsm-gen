@@ -16,7 +16,8 @@ Usage:
     vlsm -a <base_addr> -m <base_net_mask> -n (<necessity>  ... )
         -a        specifies the base network address for creating the subnets.
         -m        specifies the base net mask.
-        -n        a space separated list of the needs for each network.""", file=outfile)
+        -n        a space separated list of the needs for each network.
+        Note: the necessities have to specify only the amount of hosts required per network (do not include network and broadcast, it is implied)""", file=outfile)
 
 
 def break_out(message : str = None):
@@ -142,7 +143,8 @@ def parse_args(argv : list[str]) -> tuple[int, int, list[int]]:
 
 def build_table(base_ip: int, base_mask : int, necessities : list[int]) -> list[SubnetEntry]:
     entries: list[SubnetEntry] = []
-
+    
+    necessities = [n + 2 for n in necessities] # add extra two necessities for network address and broadcast address
     amount_of_hosts : list[int] = [2 ** ceil_log_2(n) for n in necessities]  #turn all necessities into powers of 2
     current_ip : int = base_ip
     host_alloced_amount : int = 0
