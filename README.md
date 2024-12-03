@@ -1,4 +1,4 @@
-# ** VLSM table generator**
+# **VLSM table generator**
 ## **Usage:**
 ``` python vlsm.py -a <base_adrress> -m <netmask> -n (<needs>...). ```
 ## Where:
